@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>French ER Verbs Click and Match</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -14,10 +15,15 @@
       margin-bottom: 10px;
     }
     .button-container {
-      text-align: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 20px;
     }
-    .reset-button {
+    .left-buttons {
+      text-align: center;
+    }
+    .reset-button, .shuffle-button {
       padding: 8px 16px;
       font-size: 16px;
       border: none;
@@ -25,9 +31,15 @@
       background-color: #007bff;
       color: white;
       cursor: pointer;
+      margin: 0 8px;
     }
-    .reset-button:hover {
+    .reset-button:hover, .shuffle-button:hover {
       background-color: #0056b3;
+    }
+    .score-display {
+      font-size: 18px;
+      margin-right: 10px;
+      font-weight: bold;
     }
     .container {
       display: flex;
@@ -71,48 +83,73 @@
 <body>
   <h2>Click and Match: French ER Verbs and Their Meanings</h2>
   <div class="button-container">
-    <button class="reset-button" onclick="window.location.reload()">Reset</button>
+    <div class="left-buttons">
+      <button class="reset-button" onclick="window.location.reload()">Reset</button>
+      <button class="shuffle-button" onclick="shuffleItems()">Shuffle</button>
+    </div>
+    <div class="score-display" id="score">Score: 0 / 25</div>
   </div>
   <div class="container">
-    <div class="item-list" id="verbs">
-      <!-- VERB ITEMS INSERTED HERE -->
-    </div>
-    <div class="item-list" id="meanings">
-      <!-- MEANING ITEMS INSERTED HERE -->
-    </div>
+    <div class="item-list" id="verbs"></div>
+    <div class="item-list" id="meanings"></div>
   </div>
 
   <script>
-    window.addEventListener('DOMContentLoaded', function () {
-      const verbs = [
-        { french: 'adorer', english: 'to adore' },
-        { french: 'demander', english: 'to ask' },
-        { french: 'fermer', english: 'to close' },
-        { french: 'compter', english: 'to count' },
-        { french: 'couper', english: 'to cut' },
-        { french: 'discuter', english: 'to discuss' },
-        { french: 'dessiner', english: 'to draw' },
-        { french: 'tomber', english: 'to fall' },
-        { french: 'trouver', english: 'to find' },
-        { french: 'donner', english: 'to give' },
-        { french: 'détester', english: 'to hate' },
-        { french: 'déjeuner', english: 'to have lunch' },
-        { french: 'inviter', english: 'to invite' },
-        { french: 'aimer', english: 'to like/to love' },
-        { french: 'écouter', english: 'to listen' },
-        { french: 'regarder', english: 'to look at / to watch' },
-        { french: 'jouer', english: 'to play' },
-        { french: 'préférer', english: 'to prefer' },
-        { french: 'préparer', english: 'to prepare' },
-        { french: 'chanter', english: 'to sing' },
-        { french: 'étudier', english: 'to study' },
-        { french: 'visiter', english: 'to visit' },
-        { french: 'marcher', english: 'to walk' },
-        { french: 'porter', english: 'to wear/to carry' },
-        { french: 'travailler', english: 'to work' }
-      ];
+    let verbs = [
+      { french: 'adorer', english: 'to adore' },
+      { french: 'demander', english: 'to ask' },
+      { french: 'fermer', english: 'to close' },
+      { french: 'compter', english: 'to count' },
+      { french: 'couper', english: 'to cut' },
+      { french: 'discuter', english: 'to discuss' },
+      { french: 'dessiner', english: 'to draw' },
+      { french: 'tomber', english: 'to fall' },
+      { french: 'trouver', english: 'to find' },
+      { french: 'donner', english: 'to give' },
+      { french: 'détester', english: 'to hate' },
+      { french: 'déjeuner', english: 'to have lunch' },
+      { french: 'inviter', english: 'to invite' },
+      { french: 'aimer', english: 'to like/to love' },
+      { french: 'écouter', english: 'to listen' },
+      { french: 'regarder', english: 'to look at / to watch' },
+      { french: 'jouer', english: 'to play' },
+      { french: 'préférer', english: 'to prefer' },
+      { french: 'préparer', english: 'to prepare' },
+      { french: 'chanter', english: 'to sing' },
+      { french: 'étudier', english: 'to study' },
+      { french: 'visiter', english: 'to visit' },
+      { french: 'marcher', english: 'to walk' },
+      { french: 'porter', english: 'to wear/to carry' },
+      { french: 'travailler', english: 'to work' }
+    ];
 
-      const shuffledMeanings = [...verbs].sort(() => Math.random() - 0.5);
+    let score = 0;
+
+    function updateScoreDisplay() {
+      document.getElementById('score').textContent = `Score: ${score} / 25`;
+    }
+
+    function celebrate() {
+      confetti({
+        particleCount: 200,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    }
+
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function clearContainers() {
+      document.getElementById('verbs').innerHTML = '';
+      document.getElementById('meanings').innerHTML = '';
+    }
+
+    function populateGame() {
+      clearContainers();
+      score = 0;
+      updateScoreDisplay();
 
       const verbContainer = document.getElementById('verbs');
       const meaningContainer = document.getElementById('meanings');
@@ -125,6 +162,7 @@
         verbContainer.appendChild(div);
       });
 
+      const shuffledMeanings = shuffle([...verbs]);
       shuffledMeanings.forEach(v => {
         const div = document.createElement('div');
         div.className = 'item';
@@ -132,10 +170,14 @@
         meaningContainer.appendChild(div);
       });
 
+      attachEventHandlers();
+    }
+
+    function attachEventHandlers() {
       let selectedVerb = null;
 
-      const verbItems = verbContainer.querySelectorAll('.item');
-      const meaningItems = meaningContainer.querySelectorAll('.item');
+      const verbItems = document.querySelectorAll('#verbs .item');
+      const meaningItems = document.querySelectorAll('#meanings .item');
 
       verbItems.forEach(item => {
         item.addEventListener('click', () => {
@@ -163,6 +205,9 @@
             selectedVerb.style.pointerEvents = 'none';
             selectedVerb.classList.remove('selected');
             selectedVerb = null;
+            score++;
+            updateScoreDisplay();
+            if (score === 25) celebrate();
           } else {
             const currentVerb = selectedVerb;
             const currentItem = item;
@@ -177,7 +222,14 @@
           }
         });
       });
-    });
+    }
+
+    function shuffleItems() {
+      verbs = shuffle(verbs);
+      populateGame();
+    }
+
+    window.addEventListener('DOMContentLoaded', populateGame);
   </script>
 </body>
 </html>
