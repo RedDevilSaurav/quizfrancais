@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>French-English Click-to-Match Quiz</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
+    h2 { color: #2c3e50; }
+    .container { display: flex; gap: 50px; }
+    .list {
+  padding: 10px;
+  border: 2px dashed #ccc;
+  width: 20%; min-height: 500px; background: #fff; }
+    .item { padding: 8px 12px; margin: 5px 0; background: #3498db; color: white; border-radius: 5px; cursor: pointer; text-align: center; }
+    .selected { border: 2px solid #f1c40f; }
+    .correct { background-color: #2ecc71 !important; }
+    .incorrect { background-color: #e74c3c !important; }
+    button {
+  margin-top: 20px;
+  padding: 18px 16px;
+  font-size: 16px;
+  width: auto;
+  min-width: auto;
+}
+  </style>
+</head>
+<body>
+
+<h2>Click and Match the French Words to their English Meanings</h2>
+<p>Click one French word, then click the corresponding English word to check the match.</p>
+
+<div class="container">
+  <div id="frenchList" class="list"></div>
+  <div id="englishList" class="list"></div>
+</div>
+
+<div style="margin-top: 20px;">
+  <button onclick="resetQuiz()">Reset</button>
+  <button onclick="shuffleQuiz()">Shuffle</button>
+</div>
+
+<script>
+const pairs = [
+  ["l’ananas", "pineapple"],
+  ["à côté de", "next to, beside"],
+  ["contre", "against"],
+  ["à droite", "on the right"],
+  ["à gauche", "on the left"],
+  ["adorer", "to adore"],
+  ["les adultes", "adults"],
+  ["l’agrafeuse", "stapler"],
+  ["aider", "to help"],
+  ["les ailes", "wings"],
+  ["aînés", "older/elder"],
+  ["le bâtiment", "building"],
+  ["la bague", "ring"],
+  ["la baguette", "long French bread"],
+  ["le bal", "dance"],
+  ["la banane", "banana"],
+  ["le banc", "bench"],
+  ["la barre de chocolat", "chocolate bar"],
+  ["le bas", "stocking"],
+  ["le bâton de colle", "glue stick"],
+  ["beau", "handsome"],
+  ["le cadeau", "gift"],
+  ["le cadet / la cadette", "younger"],
+  ["le café", "coffee, restaurant"],
+  ["la cafétéria", "cafeteria"],
+  ["le cahier", "notebook"],
+  ["le calendrier", "calendar"],
+  ["le caillou", "pebble"],
+  ["le carnaval", "carnival"],
+  ["la carotte", "carrot"],
+  ["la cantine", "canteen"]
+];
+
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+const frenchList = document.getElementById('frenchList');
+const englishList = document.getElementById('englishList');
+
+let selectedFrench = null;
+
+const shuffledPairs = shuffle([...pairs]);
+const shuffledEnglish = shuffle([...shuffledPairs]);
+
+shuffledPairs.forEach(([french], idx) => {
+  const item = document.createElement('div');
+  item.className = 'item';
+  item.textContent = french;
+  item.dataset.french = french;
+  item.onclick = () => selectFrench(item);
+  frenchList.appendChild(item);
+});
+
+shuffledEnglish.forEach(([french, english]) => {
+  const item = document.createElement('div');
+  item.className = 'item';
+  item.textContent = english;
+  item.dataset.match = french;
+  item.onclick = () => matchWithEnglish(item);
+  englishList.appendChild(item);
+});
+
+function selectFrench(item) {
+  clearSelections();
+  selectedFrench = item;
+  item.classList.add('selected');
+}
+
+function matchWithEnglish(englishItem) {
+  if (!selectedFrench) return;
+
+  const frenchText = selectedFrench.dataset.french;
+  const correctMatch = englishItem.dataset.match;
+
+  // Reset previous status
+  selectedFrench.classList.remove('correct', 'incorrect');
+  englishItem.classList.remove('correct', 'incorrect');
+
+  if (frenchText === correctMatch) {
+    selectedFrench.classList.add('correct');
+    englishItem.classList.add('correct');
+  } else {
+    selectedFrench.classList.add('incorrect');
+    englishItem.classList.add('incorrect');
+  }
+
+  selectedFrench.classList.remove('selected');
+  selectedFrench = null;
+}
+
+function clearSelections() {
+  document.querySelectorAll('.item').forEach(item => {
+    item.classList.remove('selected');
+  });
+}
+function resetQuiz() {
+  document.querySelectorAll('.item').forEach(item => {
+    item.classList.remove('correct', 'incorrect', 'selected');
+  });
+  selectedFrench = null;
+}
+
+function shuffleQuiz() {
+  frenchList.innerHTML = '';
+  englishList.innerHTML = '';
+  selectedFrench = null;
+
+  const reshuffledPairs = shuffle([...pairs]);
+  const reshuffledEnglish = shuffle([...pairs]);
+
+  reshuffledPairs.forEach(([french], idx) => {
+    const item = document.createElement('div');
+    item.className = 'item';
+    item.textContent = french;
+    item.dataset.french = french;
+    item.onclick = () => selectFrench(item);
+    frenchList.appendChild(item);
+  });
+
+  reshuffledEnglish.forEach(([french, english]) => {
+    const item = document.createElement('div');
+    item.className = 'item';
+    item.textContent = english;
+    item.dataset.match = french;
+    item.onclick = () => matchWithEnglish(item);
+    englishList.appendChild(item);
+  });
+}
+
+</script>
+
+</body>
+</html>
