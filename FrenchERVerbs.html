@@ -11,22 +11,40 @@
     }
     h2 {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 10px;
+    }
+    .button-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .reset-button {
+      padding: 8px 16px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    .reset-button:hover {
+      background-color: #0056b3;
     }
     .container {
       display: flex;
+      justify-content: center;
+      gap: 40px;
       flex-wrap: wrap;
-      justify-content: space-between;
     }
     .item-list {
-      width: 20%;
+      width: 300px;
     }
     .item {
       background-color: white;
       border: 2px solid #ccc;
       border-radius: 8px;
-      padding: 10px;
-      margin: 8px;
+      padding: 8px;
+      margin: 6px auto;
+      width: 90%;
       text-align: center;
       cursor: pointer;
       transition: background-color 0.3s ease, transform 0.2s;
@@ -52,74 +70,72 @@
 </head>
 <body>
   <h2>Click and Match: French ER Verbs and Their Meanings</h2>
+  <div class="button-container">
+    <button class="reset-button" onclick="window.location.reload()">Reset</button>
+  </div>
   <div class="container">
     <div class="item-list" id="verbs">
-      <div class="item" data-match="to adore">adorer</div>
-      <div class="item" data-match="to ask">demander</div>
-      <div class="item" data-match="to close">fermer</div>
-      <div class="item" data-match="to count">compter</div>
-      <div class="item" data-match="to cut">couper</div>
-      <div class="item" data-match="to discuss">discuter</div>
-      <div class="item" data-match="to draw">dessiner</div>
-      <div class="item" data-match="to fall">tomber</div>
-      <div class="item" data-match="to find">trouver</div>
-      <div class="item" data-match="to give">donner</div>
-      <div class="item" data-match="to hate">détester</div>
-      <div class="item" data-match="to have lunch">déjeuner</div>
-      <div class="item" data-match="to invite">inviter</div>
-      <div class="item" data-match="to like/to love">aimer</div>
-      <div class="item" data-match="to listen">écouter</div>
-      <div class="item" data-match="to look at / to watch">regarder</div>
-      <div class="item" data-match="to play">jouer</div>
-      <div class="item" data-match="to prefer">préférer</div>
-      <div class="item" data-match="to prepare">préparer</div>
-      <div class="item" data-match="to sing">chanter</div>
-      <div class="item" data-match="to study">étudier</div>
-      <div class="item" data-match="to visit">visiter</div>
-      <div class="item" data-match="to walk">marcher</div>
-      <div class="item" data-match="to wear/to carry">porter</div>
-      <div class="item" data-match="to work">travailler</div>
+      <!-- VERB ITEMS INSERTED HERE -->
     </div>
     <div class="item-list" id="meanings">
-      <div class="item">to walk</div>
-      <div class="item">to sing</div>
-      <div class="item">to hate</div>
-      <div class="item">to invite</div>
-      <div class="item">to discuss</div>
-      <div class="item">to adore</div>
-      <div class="item">to play</div>
-      <div class="item">to draw</div>
-      <div class="item">to have lunch</div>
-      <div class="item">to count</div>
-      <div class="item">to study</div>
-      <div class="item">to wear/to carry</div>
-      <div class="item">to find</div>
-      <div class="item">to like/to love</div>
-      <div class="item">to give</div>
-      <div class="item">to visit</div>
-      <div class="item">to ask</div>
-      <div class="item">to prepare</div>
-      <div class="item">to work</div>
-      <div class="item">to close</div>
-      <div class="item">to look at / to watch</div>
-      <div class="item">to cut</div>
-      <div class="item">to prefer</div>
-      <div class="item">to listen</div>
-      <div class="item">to fall</div>
+      <!-- MEANING ITEMS INSERTED HERE -->
     </div>
   </div>
 
   <script>
     window.addEventListener('DOMContentLoaded', function () {
+      const verbs = [
+        { french: 'adorer', english: 'to adore' },
+        { french: 'demander', english: 'to ask' },
+        { french: 'fermer', english: 'to close' },
+        { french: 'compter', english: 'to count' },
+        { french: 'couper', english: 'to cut' },
+        { french: 'discuter', english: 'to discuss' },
+        { french: 'dessiner', english: 'to draw' },
+        { french: 'tomber', english: 'to fall' },
+        { french: 'trouver', english: 'to find' },
+        { french: 'donner', english: 'to give' },
+        { french: 'détester', english: 'to hate' },
+        { french: 'déjeuner', english: 'to have lunch' },
+        { french: 'inviter', english: 'to invite' },
+        { french: 'aimer', english: 'to like/to love' },
+        { french: 'écouter', english: 'to listen' },
+        { french: 'regarder', english: 'to look at / to watch' },
+        { french: 'jouer', english: 'to play' },
+        { french: 'préférer', english: 'to prefer' },
+        { french: 'préparer', english: 'to prepare' },
+        { french: 'chanter', english: 'to sing' },
+        { french: 'étudier', english: 'to study' },
+        { french: 'visiter', english: 'to visit' },
+        { french: 'marcher', english: 'to walk' },
+        { french: 'porter', english: 'to wear/to carry' },
+        { french: 'travailler', english: 'to work' }
+      ];
+
+      const shuffledMeanings = [...verbs].sort(() => Math.random() - 0.5);
+
+      const verbContainer = document.getElementById('verbs');
+      const meaningContainer = document.getElementById('meanings');
+
+      verbs.forEach(v => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.dataset.match = v.english;
+        div.textContent = v.french;
+        verbContainer.appendChild(div);
+      });
+
+      shuffledMeanings.forEach(v => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.textContent = v.english;
+        meaningContainer.appendChild(div);
+      });
+
       let selectedVerb = null;
 
-      const verbList = document.getElementById('verbs');
-      const meaningList = document.getElementById('meanings');
-
-      if (!verbList || !meaningList) return;
-
-      const verbItems = verbList.querySelectorAll('.item');
-      const meaningItems = meaningList.querySelectorAll('.item');
+      const verbItems = verbContainer.querySelectorAll('.item');
+      const meaningItems = meaningContainer.querySelectorAll('.item');
 
       verbItems.forEach(item => {
         item.addEventListener('click', () => {
