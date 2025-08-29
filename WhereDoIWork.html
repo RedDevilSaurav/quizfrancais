@@ -145,6 +145,7 @@ document.addEventListener("click", function(e) {
     if (workplace === correctWP) {
       if (!selectedProfession.classList.contains("correct")) {
         selectedProfession.classList.remove("selected");
+        selectedProfession.classList.remove("wrong");
         selectedProfession.classList.add("correct");
         item.classList.add("correct");
         score += 10;
