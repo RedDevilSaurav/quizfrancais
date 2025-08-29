@@ -147,6 +147,8 @@ document.addEventListener("click", function(e) {
         selectedProfession.classList.remove("selected");
         selectedProfession.classList.remove("wrong");
         selectedProfession.classList.add("correct");
+        item.classList.remove("selected");
+        item.classList.remove("wrong");
         item.classList.add("correct");
         score += 10;
         matchedPairs++;
