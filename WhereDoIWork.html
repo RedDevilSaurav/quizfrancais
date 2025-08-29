@@ -19,8 +19,20 @@
       transition: background-color 0.3s ease, transform 0.2s;
       text-wrap-mode: nowrap;
     }
-    .item.correct { background: #c8f7c5; border-color: green; color: green; }
-    .item.wrong { background: #f7c5c5; border-color: red; color: red; }
+   .item.correct {
+      background-color: #c8f7c5 !important;
+    }
+    .item.incorrect {
+      background-color: #f8d7da !important;
+    }
+    .item.correct::after {
+      content: ' \2714';
+      color: green;
+    }
+    .item.incorrect::after {
+      content: ' \274C';
+      color: red;
+    }
     .selected {
       border-color: #007bff;
     }
