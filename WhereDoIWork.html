@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>French Professions Matching Game</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+    h1 { color: #333; }
+    #score { font-size: 20px; font-weight: bold; margin: 15px; }
+    .container { display: flex; justify-content: center; gap: 50px; margin-top: 20px; }
+    .list { width: 250px; }
+    .item { 
+      padding: 8px; 
+      margin: 5px; 
+      background: #f2f2f2; 
+      border: 1px solid #ccc; 
+      border-radius: 6px; 
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .item.correct { background: #c8f7c5; border-color: green; color: green; }
+    .item.wrong { background: #f7c5c5; border-color: red; color: red; }
+    #playAgain { 
+      margin-top: 20px; 
+      padding: 10px 20px; 
+      font-size: 16px; 
+      font-weight: bold; 
+      border: none; 
+      border-radius: 6px; 
+      background: #007BFF; 
+      color: white; 
+      cursor: pointer; 
+      transition: 0.3s; 
+    }
+    #playAgain:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+
+<h1>French Professions Matching Game</h1>
+<div id="score">Score: 0</div>
+
+<div class="container">
+  <div class="list" id="professions"></div>
+  <div class="list" id="workplaces"></div>
+</div>
+
+<button id="playAgain">🔄 Play Again</button>
+
+<!-- Canvas for Confetti -->
+<canvas id="confetti-canvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+const data = [
+  { fr: "l’acteur / l’actrice", wp: "un cinéma / un théâtre" },
+  { fr: "l’architecte", wp: "une entreprise de design" },
+  { fr: "l’artiste", wp: "un atelier / une galerie" },
+  { fr: "l’avocat / l’avocate", wp: "un cabinet juridique" },
+  { fr: "le banquier / la banquière", wp: "une banque" },
+  { fr: "le boulanger / la boulangère", wp: "une boulangerie" },
+  { fr: "le chanteur / la chanteuse", wp: "une salle de spectacle" },
+  { fr: "le coiffeur / la coiffeuse", wp: "un salon de coiffure" },
+  { fr: "le comptable / la comptable", wp: "une banque / une administration" },
+  { fr: "le couturier / la couturière", wp: "une maison de mode" },
+  { fr: "le cuisinier / la cuisinière", wp: "une cuisine" },
+  { fr: "le danseur / la danseuse", wp: "une salle de spectacle" }
+];
+
+let score = 0;
+let selectedProfession = null;
+let matchedPairs = 0;
+
+// Shuffle array
+function shuffle(arr) {
+  return arr.sort(() => Math.random() - 0.5);
+}
+
+// Render lists
+function render() {
+  const profDiv = document.getElementById("professions");
+  const wpDiv = document.getElementById("workplaces");
+  profDiv.innerHTML = "";
+  wpDiv.innerHTML = "";
+
+  shuffle(data).forEach(item => {
+    const div = document.createElement("div");
+    div.textContent = item.fr;
+    div.className = "item";
+    div.dataset.type = "profession";
+    div.dataset.match = item.wp;
+    profDiv.appendChild(div);
+  });
+
+  shuffle(data).forEach(item => {
+    const div = document.createElement("div");
+    div.textContent = item.wp;
+    div.className = "item";
+    div.dataset.type = "workplace";
+    div.dataset.match = item.fr;
+    wpDiv.appendChild(div);
+  });
+}
+
+// Update score display
+function updateScore() {
+  document.getElementById("score").textContent = "Score: " + score;
+}
+
+// Confetti Celebration
+function launchConfetti() {
+  const duration = 3 * 1000;
+  const end = Date.now() + duration;
+
+  (function frame() {
+    confetti({
+      particleCount: 6,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0 }
+    });
+    confetti({
+      particleCount: 6,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1 }
+    });
+    if (Date.now() < end) {
+      requestAnimationFrame(frame);
+    }
+  })();
+}
+
+// Handle clicks
+document.addEventListener("click", function(e) {
+  if (!e.target.classList.contains("item")) return;
+  const item = e.target;
+
+  if (item.dataset.type === "profession") {
+    selectedProfession = item;
+  } else if (item.dataset.type === "workplace" && selectedProfession) {
+    const workplace = item.textContent;
+    const correctWP = selectedProfession.dataset.match;
+
+    if (workplace === correctWP) {
+      if (!selectedProfession.classList.contains("correct")) {
+        selectedProfession.classList.add("correct");
+        item.classList.add("correct");
+        score += 10;
+        matchedPairs++;
+        if (matchedPairs === data.length) {
+          setTimeout(() => { launchConfetti(); }, 500);
+        }
+      }
+    } else {
+      score -= 5;
+      selectedProfession.classList.add("wrong");
+      item.classList.add("wrong");
+      setTimeout(() => {
+        selectedProfession.classList.remove("wrong");
+        item.classList.remove("wrong");
+      }, 800);
+    }
+    updateScore();
+    selectedProfession = null;
+  }
+});
+
+// Play Again Button
+document.getElementById("playAgain").addEventListener("click", function() {
+  score = 0;
+  matchedPairs = 0;
+  selectedProfession = null;
+  updateScore();
+  render();
+});
+
+render();
+updateScore();
+</script>
+
+</body>
+</html>
