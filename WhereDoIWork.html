@@ -10,32 +10,20 @@
     .container { display: flex; justify-content: center; gap: 50px; margin-top: 20px; }
     .list { width: 250px; }
     .item { 
-      padding: 8px; 
-      margin: 5px; 
+      padding: 10px; 
+      margin: 6px; 
       background: #f2f2f2; 
       border: 1px solid #ccc; 
       border-radius: 6px; 
       cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s;
-      text-wrap-mode: nowrap;
+      transition: 0.3s;
+      font-size: 16px;
     }
-   .item.correct {
-      background-color: #c8f7c5 !important;
-    }
-    .item.incorrect {
-      background-color: #f8d7da !important;
-    }
-    .item.correct::after {
-      content: ' \2714';
-      color: green;
-    }
-    .item.incorrect::after {
-      content: ' \274C';
-      color: red;
-    }
-    .selected {
-      border-color: #007bff;
-    }
+    .item:hover { background: #e6e6e6; }
+    .item.correct { background: #c8f7c5; border-color: green; color: green; }
+    .item.wrong { background: #f7c5c5; border-color: red; color: red; }
+    .item.selected { background: #007BFF; color: white; border-color: #0056b3; }
+
     #playAgain { 
       margin-top: 20px; 
       padding: 10px 20px; 
@@ -87,12 +75,10 @@ let score = 0;
 let selectedProfession = null;
 let matchedPairs = 0;
 
-// Shuffle array
 function shuffle(arr) {
   return arr.sort(() => Math.random() - 0.5);
 }
 
-// Render lists
 function render() {
   const profDiv = document.getElementById("professions");
   const wpDiv = document.getElementById("workplaces");
@@ -118,16 +104,13 @@ function render() {
   });
 }
 
-// Update score display
 function updateScore() {
   document.getElementById("score").textContent = "Score: " + score;
 }
 
-// Confetti Celebration
 function launchConfetti() {
   const duration = 3 * 1000;
   const end = Date.now() + duration;
-
   (function frame() {
     confetti({
       particleCount: 6,
@@ -141,25 +124,26 @@ function launchConfetti() {
       spread: 55,
       origin: { x: 1 }
     });
-    if (Date.now() < end) {
-      requestAnimationFrame(frame);
-    }
+    if (Date.now() < end) requestAnimationFrame(frame);
   })();
 }
 
-// Handle clicks
 document.addEventListener("click", function(e) {
   if (!e.target.classList.contains("item")) return;
   const item = e.target;
 
   if (item.dataset.type === "profession") {
+    // clear old selection
+    document.querySelectorAll(".item.selected").forEach(el => el.classList.remove("selected"));
     selectedProfession = item;
+    item.classList.add("selected");
   } else if (item.dataset.type === "workplace" && selectedProfession) {
     const workplace = item.textContent;
     const correctWP = selectedProfession.dataset.match;
 
     if (workplace === correctWP) {
       if (!selectedProfession.classList.contains("correct")) {
+        selectedProfession.classList.remove("selected");
         selectedProfession.classList.add("correct");
         item.classList.add("correct");
         score += 10;
@@ -173,7 +157,7 @@ document.addEventListener("click", function(e) {
       selectedProfession.classList.add("wrong");
       item.classList.add("wrong");
       setTimeout(() => {
-        selectedProfession.classList.remove("wrong");
+        selectedProfession.classList.remove("wrong","selected");
         item.classList.remove("wrong");
       }, 800);
     }
@@ -182,7 +166,6 @@ document.addEventListener("click", function(e) {
   }
 });
 
-// Play Again Button
 document.getElementById("playAgain").addEventListener("click", function() {
   score = 0;
   matchedPairs = 0;
