@@ -151,7 +151,6 @@
           score += 1; solved += 1; document.getElementById('score').textContent = score; document.getElementById('solvedCount').textContent = solved;
           Array.from(document.querySelectorAll('.key')).forEach(k=>k.classList.add('disabled'));
           showThumbsUp();
-          setTimeout(()=> alert('Correct! The word: ' + current.w), 100);
         }
       } else {
         mistakes += 1; updateMistakes();
