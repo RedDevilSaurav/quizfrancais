@@ -33,7 +33,7 @@
   <div class="wrap">
     <div class="card">
       <h1>Hangman — French Prepositions</h1>
-      <p class="lead">Guess the French preposition letter-by-letter. A clue (English meaning) is provided. Accents and spaces are shown automatically.</p>
+      <p class="lead">Guess the French preposition letter-by-letter. A clue (English meaning) is provided. Accents and spaces are shown automatically. <br/>Note: Accented and unaccented letters are treated as <strong>different</strong>.</p>
 
       <div class="ui">
         <div class="left">
@@ -62,12 +62,11 @@
               <li>Look at the English clue.</li>
               <li>Click letters to guess. Accented French letters are included on the keyboard.</li>
               <li>Spaces and special characters (/, -) are shown automatically.</li>
+              <li>Accented and unaccented letters are considered <strong>different</strong> (e.g. "e" ≠ "é").</li>
               <li>You have 6 mistakes allowed. On 7th mistake the word is revealed.</li>
-              <li>Click <strong>New Word</strong> to get another preposition.</li>
             </ol>
             <hr />
-            <div><strong>Words included</strong> (14):</div>
-            <ul id="wordList" style="margin:8px 0 0;padding-left:18px;color:var(--muted)"></ul>
+            <ul id="wordList" style="display:none; margin:8px 0 0;padding-left:18px;color:var(--muted)"></ul>
           </div>
         </div>
       </div>
@@ -101,25 +100,20 @@
     let score = 0;
     const usedIndices = new Set();
 
-    function normalize(s){
-      return s.normalize('NFD').replace(/\p{Diacritic}/gu,'').toLowerCase();
-    }
-
     function displayWord(){
       const el = document.getElementById('wordDisplay');
       let out = '';
       for(let i=0;i<current.w.length;i++){
         const ch = current.w[i];
         if(ch === ' '){
-          out += '   '; // add visible space between words
+          out += '   ';
           continue;
         }
         if(ch === '/' || ch === '-'){
           out += ch + ' ';
           continue;
         }
-        const normCh = normalize(ch);
-        if(current.guessed.has(normCh) || current.guessed.has(ch.toLowerCase())){
+        if(current.guessed.has(ch.toLowerCase())){
           out += ch + ' ';
         } else {
           out += '_ ';
@@ -146,11 +140,9 @@
       if(!clicked || clicked.classList.contains('disabled')) return;
       clicked.classList.add('disabled');
 
-      const normLetter = normalize(letter);
-      const normWord = normalize(current.w);
-      if(normWord.includes(normLetter)){
-        current.guessed.add(normLetter);
-        current.guessed.add(letter.toLowerCase());
+      const lowerLetter = letter.toLowerCase();
+      if(current.w.toLowerCase().includes(lowerLetter)){
+        current.guessed.add(lowerLetter);
         displayWord();
         if(checkSolved()){
           score += 1; solved += 1; document.getElementById('score').textContent = score; document.getElementById('solvedCount').textContent = solved;
@@ -167,11 +159,10 @@
     }
 
     function checkSolved(){
-      const norm = normalize(current.w);
-      for(let i=0;i<norm.length;i++){
-        const ch = norm[i];
+      for(let i=0;i<current.w.length;i++){
+        const ch = current.w[i];
         if(ch === ' ' || ch === '/' || ch === '-') continue;
-        if(!current.guessed.has(ch) && !current.guessed.has(norm[i])) return false;
+        if(!current.guessed.has(ch.toLowerCase())) return false;
       }
       return true;
     }
@@ -196,9 +187,9 @@
     function revealWord(){
       for(let i=0;i<current.w.length;i++){
         const ch = current.w[i];
-        const n = normalize(ch);
-        if(n && n !== ' ' && n !== '/') current.guessed.add(n);
-        current.guessed.add(ch.toLowerCase());
+        if(ch !== ' ' && ch !== '/' && ch !== '-'){
+          current.guessed.add(ch.toLowerCase());
+        }
       }
       displayWord();
       Array.from(document.querySelectorAll('.key')).forEach(k=>k.classList.add('disabled'));
