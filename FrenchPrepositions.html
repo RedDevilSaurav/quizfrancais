@@ -15,7 +15,7 @@
     .left{flex:1 1 360px}
     .right{width:300px}
     .clue{background:#f1f5f9;padding:12px;border-radius:8px;margin-bottom:10px}
-    .word{font-size:26px;letter-spacing:6px;margin:12px 0;font-weight:600}
+    .word{font-size:26px;letter-spacing:6px;margin:12px 0;font-weight:600;white-space:pre-wrap}
     .keyboard{display:grid;grid-template-columns:repeat(13,1fr);gap:6px}
     .key{padding:8px 10px;border-radius:6px;background:#eef2ff;border:1px solid #e6eefc;cursor:pointer;text-align:center;font-weight:600}
     .key.disabled{opacity:0.45;cursor:default}
@@ -61,10 +61,13 @@
             <ol style="padding-left:18px;margin:0;color:var(--muted)">
               <li>Look at the English clue.</li>
               <li>Click letters to guess. Accented French letters are included on the keyboard.</li>
+              <li>Spaces and special characters (/, -) are shown automatically.</li>
               <li>You have 6 mistakes allowed. On 7th mistake the word is revealed.</li>
               <li>Click <strong>New Word</strong> to get another preposition.</li>
             </ol>
             <hr />
+            <div><strong>Words included</strong> (14):</div>
+            <ul id="wordList" style="margin:8px 0 0;padding-left:18px;color:var(--muted)"></ul>
           </div>
         </div>
       </div>
@@ -74,7 +77,6 @@
   </div>
 
   <script>
-    // Words and clues
     const words = [
       {w: 'avec', clue: 'with'},
       {w: 'près de', clue: 'near'},
@@ -108,7 +110,11 @@
       let out = '';
       for(let i=0;i<current.w.length;i++){
         const ch = current.w[i];
-        if(ch === ' ' || ch === '/' || ch === '-'){
+        if(ch === ' '){
+          out += '   '; // add visible space between words
+          continue;
+        }
+        if(ch === '/' || ch === '-'){
           out += ch + ' ';
           continue;
         }
