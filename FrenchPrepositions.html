@@ -16,16 +16,19 @@
     .right{width:300px}
     .clue{background:#f1f5f9;padding:12px;border-radius:8px;margin-bottom:10px}
     .word{font-size:26px;letter-spacing:6px;margin:12px 0;font-weight:600;white-space:pre-wrap}
-    .keyboard{display:grid;grid-template-columns:repeat(13,1fr);gap:6px}
-    .key{padding:8px 10px;border-radius:6px;background:#eef2ff;border:1px solid #e6eefc;cursor:pointer;text-align:center;font-weight:600}
+    .keyboard{display:grid;grid-template-columns:repeat(13,1fr);gap:8px}
+    .key{padding:14px 0;border-radius:8px;background:#eef2ff;border:1px solid #e6eefc;cursor:pointer;text-align:center;font-weight:600;font-size:18px;transition:background 0.2s}
+    .key:hover{background:#c7d2fe}
     .key.disabled{opacity:0.45;cursor:default}
     .status{margin-top:12px;display:flex;gap:10px;align-items:center}
     .hangman{font-family:monospace;background:#0f172a;color:#fff;padding:8px;border-radius:6px}
     .controls{display:flex;gap:8px;flex-wrap:wrap}
-    button.btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer;background:var(--accent);color:#fff}
+    button.btn{padding:10px 14px;border-radius:8px;border:0;cursor:pointer;background:var(--accent);color:#fff;font-size:15px}
     button.ghost{background:#e2e8f0;color:#0f172a}
     .footer{margin-top:12px;color:var(--muted);font-size:13px}
     .small{font-size:13px;color:#374151}
+    .thumbs-up{font-size:40px;display:none;margin-top:10px;animation:pop 0.5s ease}
+    @keyframes pop{0%{transform:scale(0.5);opacity:0}100%{transform:scale(1);opacity:1}}
     @media(max-width:720px){.keyboard{grid-template-columns:repeat(7,1fr)} .right{width:100%}}
   </style>
 </head>
@@ -47,6 +50,8 @@
             <div class="small">Score: <span id="score">0</span></div>
             <div class="small">Words solved: <span id="solvedCount">0</span> / 14</div>
           </div>
+
+          <div id="thumbsUp" class="thumbs-up">👍</div>
 
           <div style="margin-top:14px" class="controls">
             <button class="btn" id="newBtn">New Word</button>
@@ -147,6 +152,7 @@
         if(checkSolved()){
           score += 1; solved += 1; document.getElementById('score').textContent = score; document.getElementById('solvedCount').textContent = solved;
           Array.from(document.querySelectorAll('.key')).forEach(k=>k.classList.add('disabled'));
+          showThumbsUp();
           setTimeout(()=> alert('Correct! The word: ' + current.w), 100);
         }
       } else {
@@ -156,6 +162,12 @@
           setTimeout(()=> alert('Too many mistakes. The word was: ' + current.w), 100);
         }
       }
+    }
+
+    function showThumbsUp(){
+      const el = document.getElementById('thumbsUp');
+      el.style.display = 'block';
+      setTimeout(()=>{ el.style.display='none'; }, 2000);
     }
 
     function checkSolved(){
@@ -182,6 +194,7 @@
       makeKeyboard();
       document.getElementById('clueText').textContent = current.clue;
       displayWord();
+      document.getElementById('thumbsUp').style.display = 'none';
     }
 
     function revealWord(){
@@ -200,6 +213,7 @@
       document.getElementById('score').textContent = score; document.getElementById('solvedCount').textContent = solved;
       updateMistakes(); makeKeyboard(); document.getElementById('clueText').textContent = '';
       document.getElementById('wordDisplay').textContent = '';
+      document.getElementById('thumbsUp').style.display = 'none';
     }
 
     document.getElementById('newBtn').addEventListener('click', ()=> pickNew());
