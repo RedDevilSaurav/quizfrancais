@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hangman — French Prepositions (with clues)</title>
+  <style>
+    :root{--bg:#f7f9fc;--card:#ffffff;--accent:#164e63;--muted:#6b7280}
+    body{font-family:Inter,ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); margin:0; color:#0f172a}
+    .wrap{max-width:900px;margin:28px auto;padding:20px}
+    .card{background:var(--card);padding:18px;border-radius:10px;box-shadow:0 6px 20px rgba(2,6,23,0.06)}
+    h1{margin:0 0 8px;font-size:20px;color:var(--accent)}
+    p.lead{margin:0 0 14px;color:var(--muted)}
+    .ui{display:flex;gap:16px;flex-wrap:wrap}
+    .left{flex:1 1 360px}
+    .right{width:300px}
+    .clue{background:#f1f5f9;padding:12px;border-radius:8px;margin-bottom:10px}
+    .word{font-size:26px;letter-spacing:6px;margin:12px 0;font-weight:600}
+    .keyboard{display:grid;grid-template-columns:repeat(13,1fr);gap:6px}
+    .key{padding:8px 10px;border-radius:6px;background:#eef2ff;border:1px solid #e6eefc;cursor:pointer;text-align:center;font-weight:600}
+    .key.disabled{opacity:0.45;cursor:default}
+    .status{margin-top:12px;display:flex;gap:10px;align-items:center}
+    .hangman{font-family:monospace;background:#0f172a;color:#fff;padding:8px;border-radius:6px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    button.btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer;background:var(--accent);color:#fff}
+    button.ghost{background:#e2e8f0;color:#0f172a}
+    .footer{margin-top:12px;color:var(--muted);font-size:13px}
+    .small{font-size:13px;color:#374151}
+    @media(max-width:720px){.keyboard{grid-template-columns:repeat(7,1fr)} .right{width:100%}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Hangman — French Prepositions</h1>
+      <p class="lead">Guess the French preposition letter-by-letter. A clue (English meaning) is provided. Accents and spaces are shown automatically.</p>
+
+      <div class="ui">
+        <div class="left">
+          <div class="clue"><strong>Clue:</strong> <span id="clueText"></span></div>
+          <div class="word" id="wordDisplay"></div>
+
+          <div class="keyboard" id="keyboard"></div>
+
+          <div class="status">
+            <div class="hangman" id="mistakes">Mistakes: 0 / 6</div>
+            <div class="small">Score: <span id="score">0</span></div>
+            <div class="small">Words solved: <span id="solvedCount">0</span> / 14</div>
+          </div>
+
+          <div style="margin-top:14px" class="controls">
+            <button class="btn" id="newBtn">New Word</button>
+            <button class="ghost" id="revealBtn">Reveal Word</button>
+            <button class="ghost" id="resetBtn">Reset Game</button>
+          </div>
+        </div>
+
+        <div class="right">
+          <div class="card" style="padding:12px;box-shadow:none">
+            <h3 style="margin:0 0 8px">How to play</h3>
+            <ol style="padding-left:18px;margin:0;color:var(--muted)">
+              <li>Look at the English clue.</li>
+              <li>Click letters to guess. Accented French letters are included on the keyboard.</li>
+              <li>You have 6 mistakes allowed. On 7th mistake the word is revealed.</li>
+              <li>Click <strong>New Word</strong> to get another preposition.</li>
+            </ol>
+            <hr />
+            <div><strong>Words included</strong> (14):</div>
+            <ul id="wordList" style="margin:8px 0 0;padding-left:18px;color:var(--muted)"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">Tip: open this file in a browser (double-click the .html file). Works offline.</div>
+    </div>
+  </div>
+
+  <script>
+    // Words and clues
+    const words = [
+      {w: 'avec', clue: 'with'},
+      {w: 'près de', clue: 'near'},
+      {w: 'pour', clue: 'for'},
+      {w: 'en arrière / derrière', clue: 'behind'},
+      {w: 'autour de', clue: 'around'},
+      {w: 'par', clue: 'by'},
+      {w: 'contre', clue: 'against'},
+      {w: 'loin de', clue: 'far from'},
+      {w: 'à droite', clue: 'to the right'},
+      {w: 'à gauche', clue: 'to the left'},
+      {w: 'tout droit', clue: 'straight'},
+      {w: 'au bout de', clue: 'at the end of'},
+      {w: 'à côté de', clue: 'at the side of'},
+      {w: 'sans', clue: 'without'}
+    ];
+
+    let current = null;
+    let mistakes = 0;
+    let maxMistakes = 6;
+    let solved = 0;
+    let score = 0;
+    const usedIndices = new Set();
+
+    function normalize(s){
+      return s.normalize('NFD').replace(/\p{Diacritic}/gu,'').toLowerCase();
+    }
+
+    function displayWord(){
+      const el = document.getElementById('wordDisplay');
+      let out = '';
+      for(let i=0;i<current.w.length;i++){
+        const ch = current.w[i];
+        if(ch === ' ' || ch === '/' || ch === '-'){
+          out += ch + ' ';
+          continue;
+        }
+        const normCh = normalize(ch);
+        if(current.guessed.has(normCh) || current.guessed.has(ch.toLowerCase())){
+          out += ch + ' ';
+        } else {
+          out += '_ ';
+        }
+      }
+      el.textContent = out.trim();
+    }
+
+    function makeKeyboard(){
+      const kb = document.getElementById('keyboard'); kb.innerHTML='';
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZÀÂÇÉÈÊËÎÏÔÙÛÜŸ';
+      for(const c of letters){
+        const btn = document.createElement('button');
+        btn.className='key'; btn.textContent=c;
+        btn.addEventListener('click', ()=> onGuess(c));
+        kb.appendChild(btn);
+      }
+    }
+
+    function onGuess(letter){
+      if(!current) return;
+      const btns = Array.from(document.querySelectorAll('.key'));
+      const clicked = btns.find(b=>b.textContent===letter);
+      if(!clicked || clicked.classList.contains('disabled')) return;
+      clicked.classList.add('disabled');
+
+      const normLetter = normalize(letter);
+      const normWord = normalize(current.w);
+      if(normWord.includes(normLetter)){
+        current.guessed.add(normLetter);
+        current.guessed.add(letter.toLowerCase());
+        displayWord();
+        if(checkSolved()){
+          score += 1; solved += 1; document.getElementById('score').textContent = score; document.getElementById('solvedCount').textContent = solved;
+          Array.from(document.querySelectorAll('.key')).forEach(k=>k.classList.add('disabled'));
+          setTimeout(()=> alert('Correct! The word: ' + current.w), 100);
+        }
+      } else {
+        mistakes += 1; updateMistakes();
+        if(mistakes > maxMistakes){
+          revealWord();
+          setTimeout(()=> alert('Too many mistakes. The word was: ' + current.w), 100);
+        }
+      }
+    }
+
+    function checkSolved(){
+      const norm = normalize(current.w);
+      for(let i=0;i<norm.length;i++){
+        const ch = norm[i];
+        if(ch === ' ' || ch === '/' || ch === '-') continue;
+        if(!current.guessed.has(ch) && !current.guessed.has(norm[i])) return false;
+      }
+      return true;
+    }
+
+    function updateMistakes(){
+      document.getElementById('mistakes').textContent = 'Mistakes: ' + mistakes + ' / ' + maxMistakes;
+    }
+
+    function pickNew(){
+      if(usedIndices.size >= words.length){
+        alert('All words used. Reset game to play again.'); return;
+      }
+      let idx; do { idx = Math.floor(Math.random()*words.length);} while(usedIndices.has(idx));
+      usedIndices.add(idx);
+      current = { ...words[idx], guessed: new Set() };
+      mistakes = 0; updateMistakes();
+      makeKeyboard();
+      document.getElementById('clueText').textContent = current.clue;
+      displayWord();
+    }
+
+    function revealWord(){
+      for(let i=0;i<current.w.length;i++){
+        const ch = current.w[i];
+        const n = normalize(ch);
+        if(n && n !== ' ' && n !== '/') current.guessed.add(n);
+        current.guessed.add(ch.toLowerCase());
+      }
+      displayWord();
+      Array.from(document.querySelectorAll('.key')).forEach(k=>k.classList.add('disabled'));
+    }
+
+    function resetGame(){
+      mistakes = 0; score = 0; solved = 0; usedIndices.clear(); current = null;
+      document.getElementById('score').textContent = score; document.getElementById('solvedCount').textContent = solved;
+      updateMistakes(); makeKeyboard(); document.getElementById('clueText').textContent = '';
+      document.getElementById('wordDisplay').textContent = '';
+    }
+
+    document.getElementById('newBtn').addEventListener('click', ()=> pickNew());
+    document.getElementById('revealBtn').addEventListener('click', ()=> revealWord());
+    document.getElementById('resetBtn').addEventListener('click', ()=> { if(confirm('Reset entire game?')) resetGame(); });
+
+    const wl = document.getElementById('wordList');
+    words.forEach(o=>{ const li = document.createElement('li'); li.textContent = o.w + ' — ' + o.clue; wl.appendChild(li)});
+
+    makeKeyboard(); updateMistakes();
+    pickNew();
+  </script>
+</body>
+</html>
